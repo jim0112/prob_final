@@ -21,9 +21,9 @@ class Trainer:
         # dataloder parameters
         C.num_workers = 4
         # optimizer parameters
-        C.max_iters = None
+        C.max_iters = 25000
         C.batch_size = 64
-        C.learning_rate = 3e-4
+        C.learning_rate = 5e-4
         C.betas = (0.9, 0.95)
         C.weight_decay = 0.1 # only applied on matmul weights
         C.grad_norm_clip = 1.0
@@ -58,8 +58,9 @@ class Trainer:
         self.callbacks[onevent] = [callback]
 
     def trigger_callbacks(self, onevent: str):
-        for callback in self.callbacks.get(onevent, []):
-            callback(self, self.model, self.train_dataset, self.test_dataset)
+        callback = self.callbacks.get(onevent)[0]
+        stop_iteration = callback(self, self.model, self.train_dataset, self.test_dataset)
+        return stop_iteration
 
     def run(self):
         model, config = self.model, self.config
@@ -70,7 +71,6 @@ class Trainer:
         # setup the dataloader
         train_loader = DataLoader(
             self.train_dataset,
-            sampler=torch.utils.data.RandomSampler(self.train_dataset, replacement=True, num_samples=int(1e10)),
             shuffle=False,
             pin_memory=True,
             batch_size=config.batch_size,
@@ -82,7 +82,6 @@ class Trainer:
         self.iter_time = time.time()
         data_iter = iter(train_loader)
         while True:
-
             # fetch the next batch (x, y) and re-init iterator if needed
             try:
                 batch = next(data_iter)
@@ -91,7 +90,6 @@ class Trainer:
                 batch = next(data_iter)
             batch = [t.to(self.device) for t in batch]
             x, y = batch
-            # print(x, y)
 
             # forward the model
             logits, self.loss = model(x, y)
@@ -102,12 +100,14 @@ class Trainer:
             torch.nn.utils.clip_grad_norm_(model.parameters(), config.grad_norm_clip)
             self.optimizer.step()
 
-            self.trigger_callbacks('on_batch_end')
+            stop_iteration = self.trigger_callbacks('on_batch_end')
             self.iter_num += 1
             tnow = time.time()
             self.iter_dt = tnow - self.iter_time
             self.iter_time = tnow
-
+            if stop_iteration != -1:
+                return stop_iteration
             # termination conditions
-            if config.max_iters is not None and self.iter_num >= config.max_iters:
+            if self.iter_num >= config.max_iters:
                 break
+        return -1

@@ -10,15 +10,13 @@ import torch
 
 # -----------------------------------------------------------------------------
 
-def set_seed(seed):
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+def set_seed(init_seed):
+    torch.manual_seed(init_seed)
+    torch.cuda.manual_seed_all(init_seed)
 
 def setup_logging(config):
     """ monotonous bookkeeping """
-    work_dir = config.system.work_dir
+    work_dir = os.path.join(config.system.work_dir, config.trainer.task)
     # create the work directory if it doesn't already exist
     os.makedirs(work_dir, exist_ok=True)
     # log the args (if any)
@@ -30,9 +28,6 @@ def setup_logging(config):
 
 class CfgNode:
     """ a lightweight configuration class inspired by yacs """
-    # TODO: convert to subclass from a dict like in yacs?
-    # TODO: implement freezing to prevent shooting of own foot
-    # TODO: additional existence/override checks when reading/writing params?
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
