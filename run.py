@@ -8,6 +8,7 @@ np.set_printoptions(threshold=np.inf)
 
 import torch
 from ChickenRabbit import ChickenRabbitDataset, eval_split
+# from GCD import GCDDataset, eval_split
 from torch.utils.data.dataloader import DataLoader
 torch.set_printoptions(profile="full")
 
@@ -23,7 +24,8 @@ def get_config():
 
     # system
     C.system = CN()
-    C.system.init_seed = 5487 # will change the weight initialization
+    # TODO: random seed for model can be set here
+    C.system.init_seed = 62 # will change the weight initialization
     C.system.work_dir = './test'
 
     # data
@@ -66,11 +68,14 @@ if __name__ == '__main__':
 
     config = get_config()
     setup_logging(config)
+
+    # TODO: try different seed for model
     set_seed(config.system.init_seed)
-    # construct train and test datasets
-    # seed: to adjust the data order of train/test-set
+
+    # TODO: try different seed to adjust the data order of train/test-set
     train_dataset = ChickenRabbitDataset(config.data, split='train', seed=0)
     test_dataset  = ChickenRabbitDataset(config.data, split='test', seed=0)
+
     # set the correct vocab size: 10, block size: chickenrabbit -> 10, gcd -> 6
     config.model.vocab_size = train_dataset.get_vocab_size()
     config.model.block_size = train_dataset.get_block_size()

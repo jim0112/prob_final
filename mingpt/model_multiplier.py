@@ -161,12 +161,13 @@ class GPT(nn.Module):
         print("number of parameters: %.2fM" % (n_params/1e6,))
 
     def _init_weights(self, module):
+        # TODO:  you may choose different initialization
         if isinstance(module, nn.Linear):
-            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            torch.nn.init.xavier_uniform_(module.weight, gain=1.0)
             if module.bias is not None:
                 torch.nn.init.zeros_(module.bias)
         elif isinstance(module, nn.Embedding):
-            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            torch.nn.init.torch.nn.init.xavier_uniform_(module.weight, gain=1.0)
         elif isinstance(module, nn.LayerNorm):
             torch.nn.init.zeros_(module.bias)
             torch.nn.init.ones_(module.weight)
