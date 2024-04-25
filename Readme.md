@@ -16,7 +16,7 @@ prob_final
 ```
 ### Main Purpose
 * Using *hypothsis test* and *p-value* to identify the effect of different **model weight initialization** and **data order** on training iterations.
-* Project Slide: https://docs.google.com/presentation/d/1qGTQq95Rn6JPsNvY6nwrSqlAG5rEFn9_WHgGpItVlpQ/edit#slide=id.g2cf5ce42891_2_19
+* Project Slide: https://docs.google.com/presentation/d/17T4LfeyejFdhVREXjFXpq5B_bg7Bd9_90NFYxr42mG8/edit?pli=1#slide=id.g2cf94e1e45f_0_0
 
 ### Precautions
 * You are not allowed to modify the pre-defined model structure (gpt2-mini)
