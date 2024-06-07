@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import pickle
 import numpy as np
 import random
 import nltk
@@ -46,7 +47,16 @@ class ChickenRabbitDataset(Dataset):
         perm = torch.tensor(data, dtype=torch.long)
 
         num_test = min(int(len(perm)*0.2), 500) # 20% of the whole dataset, or only up to 500
-        self.ixes = perm[:num_test] if split == 'test' else perm[num_test:]
+        if split == "train":
+            # self.ixes = perm[num_test:]
+            # with open("cr.pkl", "wb") as fp:
+            #     pickle.dump(self.ixes, fp)
+
+            print("load train tensor from " + config.train_pkl)
+            with open(config.train_pkl, "rb") as fp:
+                self.ixes = pickle.load(fp)
+        else:
+            self.ixes = perm[:num_test]
 
     def get_vocab_size(self):
         return 10 # digits 0..9

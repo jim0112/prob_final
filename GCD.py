@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import pickle
 import numpy as np
 import random
 import nltk
@@ -14,8 +15,6 @@ from torch.utils.data.dataloader import DataLoader
 torch.set_printoptions(profile="full")
 
 from mingpt.utils import set_seed, setup_logging, CfgNode as CN
-import setting
-import time
 
 class GCDDataset(Dataset):
 
@@ -76,8 +75,17 @@ class GCDDataset(Dataset):
 
         test_data = torch.tensor(test_data, dtype=torch.long)
         train_data = torch.tensor(train_data, dtype=torch.long)
-        
-        self.ixes = test_data if split == 'test' else train_data
+
+        if split == "train":
+            # self.ixes = train_data
+            # with open("gcd.pkl", "wb") as fp:
+            #     pickle.dump(self.ixes, fp)
+
+            print("load test tensor from " + config.train_pkl)
+            with open(config.train_pkl, "rb") as fp:
+                self.ixes = pickle.load(fp)
+        else:
+            self.ixes = test_data
 
     def get_vocab_size(self):
         return 10 # digits 0..9
