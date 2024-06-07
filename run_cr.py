@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import argparse
 import numpy as np
 import random
 import nltk
@@ -8,7 +9,6 @@ np.set_printoptions(threshold=np.inf)
 
 import torch
 from ChickenRabbit import ChickenRabbitDataset, eval_split
-# from GCD import GCDDataset, eval_split
 from torch.utils.data.dataloader import DataLoader
 torch.set_printoptions(profile="full")
 
@@ -25,11 +25,15 @@ def get_config():
     # system
     C.system = CN()
     # TODO: random seed for model can be set here
-    C.system.init_seed = 62 # will change the weight initialization
+    C.system.init_seed = 0 # will change the weight initialization
     C.system.work_dir = './test'
 
     # data
     C.data = ChickenRabbitDataset.get_default_config()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--train_pkl", type=str, required=True)
+    args = parser.parse_args()
+    C.data.train_pkl = args.train_pkl
 
     # model
     C.model = GPT.get_default_config()
@@ -57,6 +61,9 @@ def batch_end_callback(trainer, model, train_dataset, test_dataset):
             print(f"saving model with test_mean: {test_mean}")
             ckpt_path = os.path.join(f"test/{trainer.config.task}", "model_last.pt")
             torch.save(model.state_dict(), ckpt_path)
+            with open("cr_result.txt", "w") as fp:
+                fp.write(f"reach threshold 0.9 in iteration: {trainer.iter_num}\n")
+                fp.write(f"saving model with test_mean: {test_mean}\n")
             return trainer.iter_num
         # revert model to training mode
         model.train()
